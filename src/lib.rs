@@ -5,6 +5,7 @@ use tokio::runtime::Runtime;
 use plugin_interface::{ApiCallbacks, EventState, PluginInfoCallback, PluginInformation, State};
 use serde::Deserialize;
 
+mod config;
 mod telegram;
 mod things;
 
@@ -17,7 +18,7 @@ pub static plugin_info: PluginInfoCallback = plugin_information;
 
 #[no_mangle]
 pub extern "C" fn plugin_information() -> *const PluginInformation {
-    let plugin_name = CString::new("asya-telegram").unwrap();
+    let plugin_name = CString::new("asya_telegram").unwrap();
     let name = plugin_name.into_raw().cast_const();
 
     let plugin_information = PluginInformation {
@@ -36,11 +37,12 @@ struct AsyaResponse {
 }
 
 #[no_mangle]
-pub extern "C" fn init(api: ApiCallbacks) -> *mut State {
+pub extern "C" fn init(config: *const c_char, api: ApiCallbacks) -> *mut State {
+    let config = things::extract_config(config);
     unsafe {
         (api.subscribe_to_events)(events_handler);
     }
-    telegram::run_tgbot(api);
+    telegram::run_tgbot(api, config);
     Box::into_raw(Box::new(State::default()))
 }
 

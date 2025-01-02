@@ -902,7 +902,7 @@ checksum = "953ec861398dccce10c670dfeaf3ec4911ca479e9c02154b3a215178c5f566f2"
 [[package]]
 name = "plugin_interface"
 version = "0.1.0"
-source = "git+https://github.com/asya4u/asya-daemon#7017a93eb89978ddb8c0d2bef150a13a46b4aad9"
+source = "git+https://github.com/asya4u/asya-daemon#285fabfbcc8fcd6a0d86e0a490fe83c1ba110998"
 
 [[package]]
 name = "proc-macro-error"
