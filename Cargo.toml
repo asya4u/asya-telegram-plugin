@@ -1,0 +1,16 @@
+[package]
+name = "asya-tgbot"
+version = "0.1.0"
+edition = "2021"
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+plugin_interface = { git = "https://github.com/asya4u/asya-daemon" }
+
+serde_json = "*"
+serde = { version = "*", features = ["derive"] }
+tokio = { version =  "1.8", features = ["rt-multi-thread", "macros"] }
+teloxide = { version = "0.13", features = ["macros"] }
+
+lazy_static = "*"
