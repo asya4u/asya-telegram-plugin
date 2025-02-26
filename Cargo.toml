@@ -7,7 +7,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # plugin_interface = { git = "https://github.com/asya4u/asya-daemon" }
-plugin_interface = { path = "/home/w1thluv/projs/asya-daemon/plugin_interface/" }
+plugin_interface = { path = "/home/eblan/Projects/asya-daemon/plugin_interface/" }
 
 serde_json = "*"
 serde = { version = "*", features = ["derive"] }

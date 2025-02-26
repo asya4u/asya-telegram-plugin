@@ -41,10 +41,15 @@ pub extern "C" fn init(config: *const c_char, api: ApiCallbacksMap) -> *mut Stat
     let config = things::extract_config(config);
     dbg!(&api);
     unsafe {
-        let callback = api.callback("subscribe_to_events")
-            as *const unsafe extern "C" fn(callback: unsafe extern "C" fn(*const c_char));
-        println!("init bebra");
-        (*callback)(events_handler);
+        let callback_ptr = api.callback("subscribe_to_events");
+        if !callback_ptr.is_null() {
+            let subscribe_fn: unsafe extern "C" fn(unsafe extern "C" fn(*const c_char)) =
+                std::mem::transmute(callback_ptr);
+            subscribe_fn(events_handler);
+            println!("Subscribed to events");
+        } else {
+            println!("Failed to subscribe to events");
+        }
     }
     telegram::run_tgbot(api, config);
     Box::into_raw(Box::new(State::default()))
@@ -52,7 +57,6 @@ pub extern "C" fn init(config: *const c_char, api: ApiCallbacksMap) -> *mut Stat
 
 #[no_mangle]
 pub extern "C" fn events_handler(event: *const c_char) {
-    println!("SEGFOLT PRINTAMI");
     let cstring = unsafe { CString::from_raw(event.cast_mut()) };
     let value = cstring.to_string_lossy().to_string();
     RUNTIME.spawn(async move {
