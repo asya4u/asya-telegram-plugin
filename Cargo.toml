@@ -6,11 +6,12 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-plugin_interface = { git = "https://github.com/asya4u/asya-daemon" }
+# plugin_interface = { git = "https://github.com/asya4u/asya-daemon" }
+plugin_interface = { path = "/home/w1thluv/projs/asya-daemon/plugin_interface/" }
 
 serde_json = "*"
 serde = { version = "*", features = ["derive"] }
-tokio = { version =  "1.8", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.8", features = ["rt-multi-thread", "macros"] }
 teloxide = { version = "0.13", features = ["macros"] }
 
 lazy_static = "*"

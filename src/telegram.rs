@@ -1,10 +1,11 @@
-use std::ffi::CString;
+use std::ffi::{c_char, CString};
 
 use crate::config::{self, Config};
 use crate::things;
 
 use super::AsyaResponse;
 
+use plugin_interface::ApiCallbacksMap;
 use teloxide::prelude::Requester;
 use teloxide::types::Message;
 
@@ -14,9 +15,11 @@ use tokio::sync::OnceCell;
 
 use super::RUNTIME;
 
-use plugin_interface::ApiCallbacks;
-
-pub(crate) fn run_tgbot(api: ApiCallbacks, config: Config) {
+pub(crate) fn run_tgbot(api: ApiCallbacksMap, config: Config) {
+    let void_ptr_func = unsafe {
+        api.callback("send_human_request") as *const unsafe extern "C" fn(request: *mut c_char)
+    };
+    let void_ptr_func = unsafe { *void_ptr_func };
     RUNTIME.spawn(async move {
         config::CONFIG_INSTANCE
             .get_or_init(|| async { config })
@@ -41,10 +44,10 @@ pub(crate) fn run_tgbot(api: ApiCallbacks, config: Config) {
                     });
                 })
                 .await;
+
                 let cstring = CString::new(msg.text().unwrap()).unwrap();
-                unsafe {
-                    (api.send_human_request)(cstring.into_raw());
-                }
+
+                unsafe { (void_ptr_func)(cstring.into_raw()) };
             }
             Ok(())
         })

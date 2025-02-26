@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use std::ffi::{c_char, CString};
 use tokio::runtime::Runtime;
 
-use plugin_interface::{ApiCallbacks, EventState, PluginInfoCallback, PluginInformation, State};
+use plugin_interface::{ApiCallbacksMap, EventState, PluginInfoCallback, PluginInformation, State};
 use serde::Deserialize;
 
 mod config;
@@ -37,10 +37,14 @@ struct AsyaResponse {
 }
 
 #[no_mangle]
-pub extern "C" fn init(config: *const c_char, api: ApiCallbacks) -> *mut State {
+pub extern "C" fn init(config: *const c_char, api: ApiCallbacksMap) -> *mut State {
     let config = things::extract_config(config);
+    dbg!(&api);
     unsafe {
-        (api.subscribe_to_events)(events_handler);
+        let callback = api.callback("subscribe_to_events")
+            as *const unsafe extern "C" fn(callback: unsafe extern "C" fn(*const c_char));
+        println!("init bebra");
+        (*callback)(events_handler);
     }
     telegram::run_tgbot(api, config);
     Box::into_raw(Box::new(State::default()))
@@ -48,6 +52,7 @@ pub extern "C" fn init(config: *const c_char, api: ApiCallbacks) -> *mut State {
 
 #[no_mangle]
 pub extern "C" fn events_handler(event: *const c_char) {
+    println!("SEGFOLT PRINTAMI");
     let cstring = unsafe { CString::from_raw(event.cast_mut()) };
     let value = cstring.to_string_lossy().to_string();
     RUNTIME.spawn(async move {
@@ -58,7 +63,7 @@ pub extern "C" fn events_handler(event: *const c_char) {
 }
 
 #[no_mangle]
-pub extern "C" fn execute(_state: *mut State, _api: ApiCallbacks) {}
+pub extern "C" fn execute(_state: *mut State, _api: ApiCallbacksMap) {}
 
 #[no_mangle]
-pub extern "C" fn handler(_data: *const EventState, _api: ApiCallbacks) {}
+pub extern "C" fn handler(_data: *const EventState, _api: ApiCallbacksMap) {}
