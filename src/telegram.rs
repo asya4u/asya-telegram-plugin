@@ -36,8 +36,17 @@ pub(crate) fn run_tgbot(api: ApiCallbacksMap, config: Config) {
                             let mut lock = mtx.lock().await;
                             let res = lock.recv().await.unwrap();
                             if res.contains("asyaResponse") {
-                                let value = &serde_json::from_str::<AsyaResponse>(&res).unwrap();
-                                let _ = bot.send_message(msg.chat.id, value.message.clone()).await;
+                                let value =
+                                    &serde_json::from_str::<serde_json::Value>(&res).unwrap();
+                                let _ = bot
+                                    .send_message(
+                                        msg.chat.id,
+                                        serde_json::to_string(
+                                            &value.pointer("/eventBody/message").unwrap(),
+                                        )
+                                        .unwrap(),
+                                    )
+                                    .await;
                             }
                         }
                     });

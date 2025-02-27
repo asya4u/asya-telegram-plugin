@@ -2,7 +2,9 @@ use lazy_static::lazy_static;
 use std::ffi::{c_char, CString};
 use tokio::runtime::Runtime;
 
-use plugin_interface::{ApiCallbacksMap, EventState, PluginInfoCallback, PluginInformation, State};
+use plugin_interface::{
+    ApiCallbacksMap, EventState, NativePluginInformation, PluginInfoCallback, State,
+};
 use serde::Deserialize;
 
 mod config;
@@ -17,11 +19,11 @@ lazy_static! {
 pub static plugin_info: PluginInfoCallback = plugin_information;
 
 #[no_mangle]
-pub extern "C" fn plugin_information() -> *const PluginInformation {
+pub extern "C" fn plugin_information() -> *const NativePluginInformation {
     let plugin_name = CString::new("asya_telegram").unwrap();
     let name = plugin_name.into_raw().cast_const();
 
-    let plugin_information = PluginInformation {
+    let plugin_information = NativePluginInformation {
         name,
         init_callback: init,
         event_callback: handler,
