@@ -22,12 +22,24 @@ pub(crate) async fn get_pair() -> &'static (Sender<String>, Mutex<Receiver<Strin
 pub(crate) fn extract_config(config: *const c_char) -> config::Config {
     unsafe {
         if config.is_null() {
-            Config::default()
-        } else {
-            let cstr = CStr::from_ptr(config);
-            let casted_str = cstr.to_str().unwrap_or_default();
-            let from_str = serde_json::from_str::<config::Config>(casted_str);
-            from_str.unwrap_or_default()
+            return Config::default();
+        }
+        let cstr = CStr::from_ptr(config);
+        match cstr.to_str() {
+            Err(_) => {
+                eprintln!("Error: failed to convert C string to Rust string");
+                return Config::default();
+            }
+            Ok(casted_str) => {
+                println!("bebra blya {}", casted_str);
+                match serde_json::from_str::<config::Config>(casted_str) {
+                    Err(_) => {
+                        eprintln!("Error: failed to parse JSON string");
+                        Config::default()
+                    }
+                    Ok(config) => config,
+                }
+            }
         }
     }
 }

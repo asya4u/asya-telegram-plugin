@@ -3,7 +3,7 @@ use std::ffi::{c_char, CString};
 use crate::config::{self, Config};
 use crate::things;
 
-use super::AsyaResponse;
+// use super::AsyaResponse;
 
 use plugin_interface::ApiCallbacksMap;
 use teloxide::prelude::Requester;
@@ -16,8 +16,8 @@ use tokio::sync::OnceCell;
 use super::RUNTIME;
 
 pub(crate) fn run_tgbot(api: ApiCallbacksMap, config: Config) {
-    let void_ptr_func: unsafe extern "C" fn(request: *mut c_char) =
-        unsafe { std::mem::transmute(api.callback("send_human_request")) };
+    // let void_ptr_func: unsafe extern "C" fn(request: *mut c_char) =
+    //     unsafe { std::mem::transmute(api.callback("send_human_request")) };
 
     RUNTIME.spawn(async move {
         config::CONFIG_INSTANCE
@@ -27,7 +27,6 @@ pub(crate) fn run_tgbot(api: ApiCallbacksMap, config: Config) {
         let bot = Bot::from_env();
         teloxide::repl(bot, move |bot: Bot, msg: Message| async move {
             let allowed_users = config::CONFIG_INSTANCE.get().unwrap().allowed_users.clone();
-            dbg!(&allowed_users);
             if allowed_users.contains(&msg.chat.username().unwrap().to_string()) {
                 LOOP.get_or_init(|| async {
                     RUNTIME.spawn(async move {
@@ -35,7 +34,7 @@ pub(crate) fn run_tgbot(api: ApiCallbacksMap, config: Config) {
                         loop {
                             let mut lock = mtx.lock().await;
                             let res = lock.recv().await.unwrap();
-                            if res.contains("asyaResponse") {
+                            if res.contains("AsyaResponse") {
                                 let value =
                                     &serde_json::from_str::<serde_json::Value>(&res).unwrap();
                                 let _ = bot
@@ -55,7 +54,7 @@ pub(crate) fn run_tgbot(api: ApiCallbacksMap, config: Config) {
 
                 let cstring = CString::new(msg.text().unwrap()).unwrap();
 
-                unsafe { (void_ptr_func)(cstring.into_raw()) };
+                // unsafe { (void_ptr_func)(cstring.into_raw()) };
             }
             Ok(())
         })
