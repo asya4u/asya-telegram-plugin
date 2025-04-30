@@ -28,10 +28,10 @@ pub unsafe extern "C" fn plugin_information() -> *const NativePluginInformation 
     Box::into_raw(Box::new(plugin_information)).cast_const()
 }
 
-// #[derive(Debug, Deserialize, Clone)]
-// struct AsyaResponse {
-//     pub message: String,
-// }
+#[derive(Debug, Deserialize, Clone)]
+struct AsyaResponse {
+    pub message: String,
+}
 
 #[no_mangle]
 pub extern "C" fn init(config: *const c_char, api: ApiCallbacksMap) {
@@ -58,10 +58,8 @@ pub extern "C" fn init(config: *const c_char, api: ApiCallbacksMap) {
 
 #[no_mangle]
 pub unsafe extern "C" fn events_handler(event: *const c_char) {
-    println!("EVENT: {:#?}", event);
     let cstring = unsafe { CStr::from_ptr(event) };
     let value = cstring.to_string_lossy().to_string();
-    println!("ВАЛУЕ {}", value);
     RUNTIME.spawn(async move {
         let (tx, _) = things::get_pair().await;
         let _ = tx.send(value).await;

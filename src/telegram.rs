@@ -16,8 +16,8 @@ use tokio::sync::OnceCell;
 use super::RUNTIME;
 
 pub(crate) fn run_tgbot(api: ApiCallbacksMap, config: Config) {
-    // let void_ptr_func: unsafe extern "C" fn(request: *mut c_char) =
-    //     unsafe { std::mem::transmute(api.callback("send_human_request")) };
+    let void_ptr_func: unsafe extern "C" fn(request: *mut c_char) =
+        unsafe { std::mem::transmute(api.callback("send_human_request")) };
 
     RUNTIME.spawn(async move {
         config::CONFIG_INSTANCE
@@ -53,8 +53,7 @@ pub(crate) fn run_tgbot(api: ApiCallbacksMap, config: Config) {
                 .await;
 
                 let cstring = CString::new(msg.text().unwrap()).unwrap();
-
-                // unsafe { (void_ptr_func)(cstring.into_raw()) };
+                unsafe { (void_ptr_func)(cstring.into_raw()) };
             }
             Ok(())
         })
